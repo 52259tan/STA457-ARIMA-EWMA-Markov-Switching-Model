@@ -53,19 +53,19 @@ filtered_df <- cocoa_price[cocoa_price$DATE < as.Date("2024-01-01"), ]
 clean_prices <- na.omit(as.numeric(gsub(",", "", filtered_df$PRICE)))
 
 
-returns <- diff((clean_prices))
+diff_price <- diff((clean_prices))
 # Spectral analysis of returns
-spec_returns <- spectrum(returns,
-                         main = "Spectral Density of Cocoa Returns",
+spec_returns <- spectrum(diff_price,
+                         main = "Spectral Density of Cocoa price differenced",
                          spans = c(3, 3),
                          log = "no")
 
 # Find dominant frequency
 peak_index_ret <- which.max(spec_returns$spec)
 peak_frequency_ret <- spec_returns$freq[peak_index_ret]
-cat("Fundamental frequency with highest spectral density (returns):", peak_frequency_ret, "\n")
+cat("Fundamental frequency with highest spectral density (diff price):", peak_frequency_ret, "\n")
 cat("Corresponding period (in days):", 1 / peak_frequency_ret, "\n")
-plot(returns, type = 'l')
+plot(diff_price, type = 'l')
 
 ```
 
