@@ -1,0 +1,71 @@
+
+
+```{r cars}
+library(ggplot2)
+library(dplyr)
+library(tseries)
+library(forecast)
+library(qcc)
+library(depmixS4)
+
+```
+
+```{r}
+
+# Cleaning cocoa price data
+cocoa_price_raw <- cocoa_price_raw <- read.csv("Daily Prices_ICCO.csv")
+cocoa_price_raw[, 2] <- as.numeric(gsub(",", "", cocoa_price_raw[, 2])) #convert string to number
+colnames(cocoa_price_raw)[2] <- "PRICE" #changing column name
+colnames(cocoa_price_raw)[1] <- "DATE" #changing column name
+cocoa_price_raw$DATE <- as.Date(cocoa_price_raw$DATE, format = "%d/%m/%Y") #Convert into Date object
+cocoa_price = cocoa_price_raw
+
+
+```
+
+
+
+```{r}
+cocoa_price <- read.csv("Daily Prices_ICCO.csv")
+cocoa_price <- cocoa_price[-279, ]
+cocoa_price <- cocoa_price[-281, ]
+# If column names aren't set correctly, rename them
+if (ncol(cocoa_price) >= 2) {
+  colnames(cocoa_price)[1:2] <- c("DATE", "PRICE")
+}
+
+# Ensure DATE is in character format before converting
+cocoa_price$DATE <- as.character(cocoa_price$DATE)
+
+# Convert DATE column to Date class
+cocoa_price$DATE <- as.Date(cocoa_price$DATE, format = "%d/%m/%Y")
+
+# Check for any conversion issues
+if (any(is.na(cocoa_price$DATE))) {
+  stop("DATE conversion failed for some rows — check the date format.")
+}
+
+cocoa_price <- cocoa_price[order(cocoa_price$DATE), ]
+# Remove duplicates by DATE
+cocoa_price <- cocoa_price[!duplicated(cocoa_price$DATE), ]
+
+filtered_df <- cocoa_price[cocoa_price$DATE < as.Date("2024-01-01"), ]
+clean_prices <- na.omit(as.numeric(gsub(",", "", filtered_df$PRICE)))
+
+
+returns <- diff((clean_prices))
+# Spectral analysis of returns
+spec_returns <- spectrum(returns,
+                         main = "Spectral Density of Cocoa Returns",
+                         spans = c(3, 3),
+                         log = "no")
+
+# Find dominant frequency
+peak_index_ret <- which.max(spec_returns$spec)
+peak_frequency_ret <- spec_returns$freq[peak_index_ret]
+cat("Fundamental frequency with highest spectral density (returns):", peak_frequency_ret, "\n")
+cat("Corresponding period (in days):", 1 / peak_frequency_ret, "\n")
+plot(returns, type = 'l')
+
+```
+
