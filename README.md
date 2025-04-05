@@ -2,3 +2,5 @@
 ARIMA + EWMA integrated Markov Switching Model to predict cocoa prices in volatile regions.
 
 A.Wang, H.Jones, J.Markou, J.Tan
+University of Toronto
+STA457-2025
